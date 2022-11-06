@@ -3,6 +3,9 @@ name = "pixel2mesh-pytorch-noahcao"
 version = "0.1.0"
 description = ""
 authors = ["pollenjp <polleninjp@gmail.com>"]
+packages = [
+    { include = "p2m", from = "src" },
+]
 
 [tool.poetry.dependencies]
 python = "^3.7,<3.11"
@@ -14,8 +17,8 @@ tensorboardX = "^2.4.1"
 trimesh = "^3.9.42"
 Shapely = "^1.8.0"
 Pillow = "6.1"
-torch = { file = ".wheel/torch-1.1.0-cp37-cp37m-linux_x86_64.whl" }
-torchvision = { file = ".wheel/torchvision-0.3.0-cp37-cp37m-manylinux1_x86_64.whl" }
+torch = { file = ".wheel/download.pytorch.org/whl/cu90/torch-1.1.0-cp37-cp37m-linux_x86_64.whl" }
+torchvision = { file = ".wheel/download.pytorch.org/whl/cu90/torchvision-0.3.0-cp37-cp37m-manylinux1_x86_64.whl" }
 
 
 [tool.poetry.dev-dependencies]
@@ -25,8 +28,11 @@ autoflake8 = "^0.2.2"
 isort = "^5.10.1"
 mypy = "^0.931"
 nox = "^2022.1.7"
-poethepoet = "^0.12.0"
 tensorboard = "^2.8.0"
+
+[tool.poetry.group.dev.dependencies]
+types-pyyaml = "^6.0.12"
+tensorboard = "^2.10.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -48,8 +54,3 @@ import_heading_localfolder = "Local Library"
 python_version = "3.7"
 warn_return_any = true
 warn_unused_configs = true
-
-[tool.poe.tasks]
-# <https://pytorch.org/get-started/previous-versions/#v110>
-force-cuda90 = "pip3 install torch==1.1.0 torchvision==0.3.0 -f https://download.pytorch.org/whl/cu90/torch_stable.html"
-force-neural-renderer = "pip3 install neural_renderer_pytorch"

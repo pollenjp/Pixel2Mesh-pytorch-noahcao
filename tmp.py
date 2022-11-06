@@ -1,5 +1,5 @@
+# Standard Library
 import logging
-import pickle
 from logging import getLogger
 from pathlib import Path
 
@@ -11,20 +11,13 @@ logger = getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 if __name__ == "__main__":
-    pkl_path: Path = Path("/media/data_hdd/hiroakisugisaki/data/dataset/ShapeNet_for_P2M/ShapeNetP2M/02691156/10155655850468db78d106ce0a280f87/rendering/01.dat")
-    if not pkl_path.exists():
-        raise FileNotFoundError(f"{pkl_path}")
+    # Third Party Library
+    import torch
 
-    with open(pkl_path, mode="rb") as f:
-        data = pickle.load(f, encoding="latin1")
+    # First Party Library
+    from p2m.datasets.shapenet_with_template import extract_coords_from_obj_file
 
-    logger.info(f"type(data)={type(data)}")
-    logger.info(f"data.shape={data.shape}")
+    fpath = Path("/home/hiroakisugisaki/workdir/github/pollenjp/pixel2mesh-pytorch-noahcao/datasets/data/shapenet/data_with_template/02691156/1a04e3eab45ca15dd86060f189eb133/rendering/00_depth0001.obj")
 
-    pts, normals = data[:, :3], data[:, 3:]
-
-    logger.info(f"type(pts)={type(pts)}")
-    logger.info(f"pts.shape={pts.shape}")
-
-    logger.info(f"type(normals)={type(normals)}")
-    logger.info(f"normals.shape={normals.shape}")
+    coords = torch.tensor(extract_coords_from_obj_file(fpath))
+    logger.info(coords)

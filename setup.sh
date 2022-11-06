@@ -14,16 +14,18 @@ function download_from_pytorch_wheel() {
     python_version="$(echo "${3:-3.7}" | tr -d .)"
     cuda_version="$(echo "${6:-9.0}" | tr -d .)"
     local pytorch_wheel_name="${package_name}-${package_version}-cp${python_version}-cp${python_version}m-${os_type}_${arch}.whl"
-    local pytorch_wheel_url="https://download.pytorch.org/whl/cu${cuda_version}/${pytorch_wheel_name}"
-    local pytorch_wheel_path="${pytorch_wheel_name}"
-    if [ ! -f "${pytorch_wheel_path}" ]; then
-        wget -O "${pytorch_wheel_path}" "${pytorch_wheel_url}"
+    local whl_path="download.pytorch.org/whl/cu${cuda_version}/${pytorch_wheel_name}"
+    local pytorch_wheel_url="https://${whl_path}"
+    mkdir -p "${whl_path%/*}"
+    if [ ! -f "${whl_path}" ]; then
+        wget -O "${whl_path}" "${pytorch_wheel_url}"
     fi
 }
 
 (
-    mkdir -p .wheel
-    cd .wheel
+    base_dir=".wheel"
+    mkdir -p "${base_dir}"
+    cd "${base_dir}"
     download_from_pytorch_wheel torch 1.1.0 3.7 linux x86_64
     download_from_pytorch_wheel torchvision 0.3.0 3.7 manylinux1 x86_64
 )
