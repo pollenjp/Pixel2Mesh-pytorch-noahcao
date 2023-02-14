@@ -1,0 +1,12 @@
+weights:
+  chamfer:
+    - 1.0
+    - 1.0
+    - 1.0
+  chamfer_opposite: 0.3
+  constant: 1.0
+  edge: 0.2
+  laplace: 0.5
+  move: 0.033
+  normal: 0.5
+  reconst: 0.0

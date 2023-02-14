@@ -1,3 +1,7 @@
+/trained/
+/tested/
+/tested_rendered/
+
 .nox*
 .wheel
 

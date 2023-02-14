@@ -1,0 +1,21 @@
+camera_c:
+  - 111.5
+  - 111.5
+camera_f:
+  - 248.0
+  - 248.0
+mesh_pos:
+  - 0.0
+  - 0.0
+  - -0.8
+name: shapenet
+normalization: true
+num_classes: 13
+shapenet:
+  num_points: 9000
+  resize_with_constant_border: false
+root_path: "~/workdir/data_local/dataset/2022-11-10/shapenet_p2m_custom"
+label_json_path: "datasets/data/meta_custom/shapenet.json"
+train_list_filepath: "datasets/data/meta_custom/train.txt"
+val_list_filepath: "datasets/data/meta_custom/val.txt"
+test_list_filepath: "datasets/data/meta_custom/test.txt"

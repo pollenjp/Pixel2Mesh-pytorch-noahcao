@@ -1,55 +1,84 @@
+# Standard Library
+import typing as t
+
 # Third Party Library
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
 # First Party Library
+from p2m.datasets.shapenet import P2MBatchData
 from p2m.models.backbones import get_backbone
 from p2m.models.layers.gbottleneck import GBottleneck
 from p2m.models.layers.gconv import GConv
 from p2m.models.layers.gpooling import GUnpooling
 from p2m.models.layers.gprojection import GProjection
+from p2m.options import OptionsModel
+from p2m.utils.mesh import Ellipsoid
 
 
 class P2MModel(nn.Module):
-
-    def __init__(self, options, ellipsoid, camera_f, camera_c, mesh_pos):
-        super(P2MModel, self).__init__()
+    def __init__(
+        self,
+        options: OptionsModel,
+        ellipsoid: Ellipsoid,
+        camera_f,
+        camera_c,
+        mesh_pos,
+    ):
+        super().__init__()
 
         self.hidden_dim = options.hidden_dim
         self.coord_dim = options.coord_dim
         self.last_hidden_dim = options.last_hidden_dim
-        self.init_pts = nn.Parameter(ellipsoid.coord, requires_grad=False)
+        self.init_pts = nn.parameter.Parameter(ellipsoid.coord, requires_grad=False)
         self.gconv_activation = options.gconv_activation
 
-        self.nn_encoder, self.nn_decoder = get_backbone(options)
+        self.nn_encoder, self.nn_decoder = get_backbone(options.backbone)
         self.features_dim = self.nn_encoder.features_dim + self.coord_dim
 
-        self.gcns = nn.ModuleList([
-            GBottleneck(6, self.features_dim, self.hidden_dim, self.coord_dim,
-                        ellipsoid.adj_mat[0], activation=self.gconv_activation),
-            GBottleneck(6, self.features_dim + self.hidden_dim, self.hidden_dim, self.coord_dim,
-                        ellipsoid.adj_mat[1], activation=self.gconv_activation),
-            GBottleneck(6, self.features_dim + self.hidden_dim, self.hidden_dim, self.last_hidden_dim,
-                        ellipsoid.adj_mat[2], activation=self.gconv_activation)
-        ])
+        self.gcns = nn.ModuleList(
+            [
+                GBottleneck(
+                    6,
+                    self.features_dim,
+                    self.hidden_dim,
+                    self.coord_dim,
+                    ellipsoid.adj_mat[0],
+                    activation=self.gconv_activation,
+                ),
+                GBottleneck(
+                    6,
+                    self.features_dim + self.hidden_dim,
+                    self.hidden_dim,
+                    self.coord_dim,
+                    ellipsoid.adj_mat[1],
+                    activation=self.gconv_activation,
+                ),
+                GBottleneck(
+                    6,
+                    self.features_dim + self.hidden_dim,
+                    self.hidden_dim,
+                    self.last_hidden_dim,
+                    ellipsoid.adj_mat[2],
+                    activation=self.gconv_activation,
+                ),
+            ]
+        )
 
-        self.unpooling = nn.ModuleList([
-            GUnpooling(ellipsoid.unpool_idx[0]),
-            GUnpooling(ellipsoid.unpool_idx[1])
-        ])
+        self.unpooling = nn.ModuleList(
+            [
+                GUnpooling(ellipsoid.unpool_idx[0]),
+                GUnpooling(ellipsoid.unpool_idx[1]),
+            ],
+        )
 
-        # if options.align_with_tensorflow:
-        #     self.projection = GProjection
-        # else:
-        #     self.projection = GProjection
-        self.projection = GProjection(mesh_pos, camera_f, camera_c, bound=options.z_threshold,
-                                      tensorflow_compatible=options.align_with_tensorflow)
+        self.projection = GProjection(mesh_pos, camera_f, camera_c, bound=options.z_threshold)
 
-        self.gconv = GConv(in_features=self.last_hidden_dim, out_features=self.coord_dim,
-                           adj_mat=ellipsoid.adj_mat[2])
+        self.gconv = GConv(in_features=self.last_hidden_dim, out_features=self.coord_dim, adj_mat=ellipsoid.adj_mat[2])
 
-    def forward(self, img):
+    def forward(self, batch: P2MBatchData):
+        img = batch["images"]
         batch_size = img.size(0)
         img_feats = self.nn_encoder(img)
         img_shape = self.projection.image_feature_shape(img)
@@ -85,8 +114,10 @@ class P2MModel(nn.Module):
         else:
             reconst = None
 
-        return {
-            "pred_coord": [x1, x2, x3],
-            "pred_coord_before_deform": [init_pts, x1_up, x2_up],
-            "reconst": reconst
-        }
+        return {"pred_coord": [x1, x2, x3], "pred_coord_before_deform": [init_pts, x1_up, x2_up], "reconst": reconst}
+
+
+class P2MModelForwardReturn(t.TypedDict):
+    pred_coord: list[torch.Tensor]  # (3,) arary. Each element is (batch_size, num_points, 3)
+    pred_coord_before_deform: list[torch.Tensor]  # [init_pts, x1_up, x2_up]
+    reconst: torch.Tensor  # TODO: ???

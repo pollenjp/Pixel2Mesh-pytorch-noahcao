@@ -1,24 +1,28 @@
 # Standard Library
+import typing as t
 import uuid
 from pathlib import Path
-from typing import Dict
-from typing import List
 
 # Third Party Library
 import nox
 from nox.sessions import Session
 
 src_dir: Path = Path(__file__).parent / "src"
-python_code_path_list: List[str] = [
+python_code_path_list: t.List[str] = [
     f"{src_dir}",
     "noxfile.py",
 ]
 assert all(isinstance(path, str) for path in python_code_path_list)
-env_common: Dict[str, str] = {
+env_common: t.Dict[str, str] = {
     "PYTHONPATH": f"{src_dir}",
 }
 nox_tmp_dir: Path = Path(__file__).parent / ".nox_tmp"
-python_version_list: List[str] = ["3.7"]
+python_version_list: t.List[str] = ["3.10"]
+
+
+class SessionKwargs(t.TypedDict, total=False):
+    env: t.Dict[str, str]
+    success_codes: t.List[int]
 
 
 def install_package(session: Session, dev: bool = False) -> None:
@@ -40,15 +44,14 @@ def install_package(session: Session, dev: bool = False) -> None:
     except Exception as e:
         raise e
     else:
-        if requirements_txt_path.exists():
-            requirements_txt_path.unlink()
+        requirements_txt_path.unlink(missing_ok=True)
 
 
 @nox.session(python=python_version_list)
 def format(session: Session) -> None:
-    env: Dict[str, str] = {}
+    env: t.Dict[str, str] = {}
     env.update(env_common)
-    kwargs = dict(env=env, success_codes=[0, 1])
+    kwargs: SessionKwargs = {"env": env, "success_codes": [0, 1]}
 
     install_package(session, dev=True)
     session.run(
@@ -67,9 +70,9 @@ def format(session: Session) -> None:
 
 @nox.session(python=python_version_list)
 def lint(session: Session) -> None:
-    env: Dict[str, str] = {}
+    env: t.Dict[str, str] = {}
     env.update(env_common)
-    kwargs = dict(env=env)
+    kwargs: SessionKwargs = {"env": env}
 
     install_package(session, dev=True)
     session.run("flake8", "--statistics", "--count", "--show-source", *python_code_path_list, **kwargs)
@@ -81,9 +84,9 @@ def lint(session: Session) -> None:
 
 @nox.session(python=python_version_list)
 def test(session: Session) -> None:
-    env: Dict[str, str] = {}
+    env: t.Dict[str, str] = {}
     env.update(env_common)
-    kwargs = dict(env=env)
+    kwargs: SessionKwargs = {"env": env}
 
     install_package(session, dev=True)
     session.run("pytest", **kwargs)

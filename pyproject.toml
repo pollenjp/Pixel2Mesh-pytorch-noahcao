@@ -3,39 +3,47 @@ name = "pixel2mesh-pytorch-noahcao"
 version = "0.1.0"
 description = ""
 authors = ["pollenjp <polleninjp@gmail.com>"]
+readme = "README.md"
 packages = [
     { include = "p2m", from = "src" },
 ]
 
 [tool.poetry.dependencies]
-python = "^3.7,<3.11"
-scikit-image = "0.15"
-opencv-python = "^4.5.5"
-easydict = "^1.9"
-PyYAML = "^6.0"
-tensorboardX = "^2.4.1"
-trimesh = "^3.9.42"
-Shapely = "^1.8.0"
-Pillow = "6.1"
-torch = { file = ".wheel/download.pytorch.org/whl/cu90/torch-1.1.0-cp37-cp37m-linux_x86_64.whl" }
-torchvision = { file = ".wheel/download.pytorch.org/whl/cu90/torchvision-0.3.0-cp37-cp37m-manylinux1_x86_64.whl" }
+python = ">=3.10,<3.11"
+scikit-image = "^0.19.3"
+opencv-python = "^4.6.0.66"
+easydict = "^1.10"
+pyyaml = "^6.0"
+tensorboardx = "^2.5.1"
+trimesh = "^3.16.0"
+shapely = "^1.8.5.post1"
+pillow = "^9.3.0"
+torch = { file = ".wheel/download.pytorch.org/whl/cu113/torch-1.12.1%2Bcu113-cp310-cp310-linux_x86_64.whl" }
+torchvision = { file = ".wheel/download.pytorch.org/whl/cu113/torchvision-0.13.1%2Bcu113-cp310-cp310-linux_x86_64.whl" }
+pytorch3d = { file = ".wheel/dl.fbaipublicfiles.com/pytorch3d/packaging/wheels/py310_cu113_pyt1121/pytorch3d-0.7.2-cp310-cp310-linux_x86_64.whl" }
+matplotlib = "^3.6.2"
+pytorch-lightning = "^1.8.3.post0"
+hydra-core = "^1.2.0"
+optuna = "^3.0.4"
+wandb = "^0.13.6"
 
-
-[tool.poetry.dev-dependencies]
-black = "^21.12b0"
-flake8 = "^4.0.1"
-autoflake8 = "^0.2.2"
-isort = "^5.10.1"
-mypy = "^0.931"
-nox = "^2022.1.7"
-tensorboard = "^2.8.0"
 
 [tool.poetry.group.dev.dependencies]
-types-pyyaml = "^6.0.12"
-tensorboard = "^2.10.1"
+black = "^22.10.0"
+flake8 = "^5.0.4"
+autoflake8 = "^0.4.0"
+isort = "^5.10.1"
+mypy = "^0.990"
+nox = "^2022.8.7"
+pytest = "^7.2.0"
+types-pyyaml = "^6.0.12.2"
+tensorboard = "^2.11.0"
+optuna-dashboard = "^0.8.0"
+optuna-fast-fanova = "^0.0.3"
+gunicorn = "^20.1.0"
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.black]
@@ -51,6 +59,27 @@ import_heading_firstparty  = "First Party Library"
 import_heading_localfolder = "Local Library"
 
 [tool.mypy]
-python_version = "3.7"
+python_version = "3.10"
+strict = true
 warn_return_any = true
 warn_unused_configs = true
+check_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = [
+    "matplotlib.*",
+    "mpl_toolkits.*",
+]
+ignore_missing_imports = true
+
+[tool.pyright]
+exclude = [
+    "datasets",
+    "logs",
+    "checkpoints",
+    "experiments",
+    ".wheel",
+    ".nox",
+    ".nox_tmp",
+    "**/__pycache__",
+]

@@ -1,5 +1,0 @@
-based_on:
-  - default.yml
-loss:
-  weights:
-    normal: 0.

@@ -1,6 +1,6 @@
 # Standard Library
-import os
 import pickle
+from pathlib import Path
 
 # Third Party Library
 import numpy as np
@@ -8,7 +8,7 @@ import torch
 from scipy.sparse import coo_matrix
 
 # First Party Library
-import config
+from p2m import config
 
 
 def torch_sparse_tensor(indices, value, size):
@@ -20,14 +20,13 @@ def torch_sparse_tensor(indices, value, size):
     v = torch.tensor(values, dtype=torch.float)
     shape = coo.shape
 
-    return torch.sparse.FloatTensor(i, v, shape)
+    return torch.sparse_coo_tensor(i, v, shape)
 
 
 class Ellipsoid(object):
-
-    def __init__(self, mesh_pos, file=config.ELLIPSOID_PATH):
+    def __init__(self, mesh_pos, file: Path = config.ELLIPSOID_PATH):
         with open(file, "rb") as fp:
-            fp_info = pickle.load(fp, encoding='latin1')
+            fp_info = pickle.load(fp, encoding="latin1")
 
         # shape: n_pts * 3
         self.coord = torch.tensor(fp_info[0]) - torch.tensor(mesh_pos, dtype=torch.float)
@@ -56,12 +55,12 @@ class Ellipsoid(object):
             adj_mat = torch_sparse_tensor(*fp_info[i][1])
             self.adj_mat.append(adj_mat)
 
-        ellipsoid_dir = os.path.dirname(file)
+        ellipsoid_dir = file.parent
         self.faces = []
         self.obj_fmt_faces = []
         # faces: f * 3, original ellipsoid, and two after deformations
         for i in range(1, 4):
-            face_file = os.path.join(ellipsoid_dir, "face%d.obj" % i)
-            faces = np.loadtxt(face_file, dtype='|S32')
+            face_file = ellipsoid_dir / f"face{i}.obj"
+            faces = np.loadtxt(face_file, dtype="|S32")
             self.obj_fmt_faces.append(faces)
-            self.faces.append(torch.tensor(faces[:, 1:].astype(np.int) - 1))
+            self.faces.append(torch.tensor(faces[:, 1:].astype(np.int32) - 1))  # 0 origin index

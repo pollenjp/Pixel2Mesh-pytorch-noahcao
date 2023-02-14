@@ -25,6 +25,4 @@ class GUnpooling(nn.Module):
         return output
 
     def __repr__(self):
-        return self.__class__.__name__ + ' (' \
-               + str(self.in_num) + ' -> ' \
-               + str(self.out_num) + ')'
+        return f"{self.__class__.__name__} {self.in_num} -> {self.out_num})"

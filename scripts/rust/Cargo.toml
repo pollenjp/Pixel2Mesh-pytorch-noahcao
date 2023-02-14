@@ -8,5 +8,14 @@ edition = "2021"
 [[bin]]
 name = "small-dataset-extraction"
 
+[[bin]]
+name = "trim-left"
+
+[[bin]]
+name = "split-dataset"
+
+[[bin]]
+name = "select-categories"
+
 [dependencies]
 clap = { version = "4.0.18", features = ["derive"] }

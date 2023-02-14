@@ -1,0 +1,28 @@
+hydra:
+  run:
+    dir: ${log_root_path}
+  job:
+    chdir: false
+
+defaults:
+  - _self_
+  - dataset: resnet_with_template
+  - model: pixel2mesh
+  - optim: adam
+  - lr_scheduler: cosine_annealing_warm_restarts
+  - loss: default
+
+datetime: ${now:%Y-%m-%dT%H%M%S}
+# checkpoint: checkpoints/check-resnet/default_resnet_0618050306/770000_000009.pt
+log_root_path: logs/${hydra:job.name}/${model.name}/${dataset.name}/${datetime}
+
+pretrained_weight_path: null
+checkpoint_path: null
+num_workers: 4
+batch_size: 4
+num_epochs: 200
+
+batch_size_for_plot: 4
+mtl_filepath: "rendering.mtl"
+usemtl_name: "Default_OBJ.001"
+random_seed: 0

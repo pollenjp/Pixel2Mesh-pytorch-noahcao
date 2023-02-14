@@ -1,0 +1,6 @@
+name: ADAM
+lr: 0.0001
+params:
+  - 0.9 # beta1
+  - 0.999 # beta2
+  - 1.0e-06 # weight_decay

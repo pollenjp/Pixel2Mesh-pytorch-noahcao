@@ -1,0 +1,8 @@
+name: MULTI_STEP
+params:
+  - 0.3 # gamma
+list_params:
+  # milestones
+  - 30
+  - 50
+  - 70
